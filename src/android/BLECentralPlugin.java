@@ -163,7 +163,8 @@ public class BLECentralPlugin extends CordovaPlugin implements BluetoothAdapter.
         } else if (action.equals(DISCONNECT)) {
 
             String macAddress = args.getString(0);
-            disconnect(callbackContext, macAddress);
+            bool waitForDisconnection = args.getBoolean(1);
+            disconnect(callbackContext, macAddress, waitForDisconnection);
 
         } else if (action.equals(READ)) {
 
@@ -346,13 +347,19 @@ public class BLECentralPlugin extends CordovaPlugin implements BluetoothAdapter.
 
     }
 
-    private void disconnect(CallbackContext callbackContext, String macAddress) {
+    private void disconnect(CallbackContext callbackContext, String macAddress, bool waitForDisconnection) {
 
         Peripheral peripheral = peripherals.get(macAddress);
         if (peripheral != null) {
-            peripheral.disconnect();
+            if (waitForDisconnection) {
+                peripheral.disconnect(callbackContext);
+            } else {
+                peripheral.disconnect(null);
+            }
         }
-        callbackContext.success();
+        if (!waitForDisconnection) {
+            callbackContext.success();
+        }
 
     }
 
