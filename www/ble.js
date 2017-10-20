@@ -91,8 +91,14 @@ module.exports = {
         cordova.exec(successWrapper, failure, 'BLE', 'connect', [device_id]);
     },
 
-    disconnect: function (device_id, success, failure) {
-        cordova.exec(success, failure, 'BLE', 'disconnect', [device_id]);
+    disconnect: function (device_id, wait_for_disconnection, success, failure) {
+        if (typeof wait_for_disconnection === 'function') {
+            // Means it is using old API, we shift the values
+            failure = success;
+            success = wait_for_disconnection;
+            wait_for_disconnection = false;
+        }
+        cordova.exec(success, failure, 'BLE', 'disconnect', [device_id, wait_for_disconnection]);
     },
 
     // characteristic value comes back as ArrayBuffer in the success callback
