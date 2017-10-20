@@ -50,6 +50,7 @@ public class Peripheral extends BluetoothGattCallback {
     BluetoothGatt gatt;
 
     private CallbackContext connectCallback;
+    private CallbackContext disconnectCallback;
     private CallbackContext readCallback;
     private CallbackContext writeCallback;
 
@@ -79,14 +80,25 @@ public class Peripheral extends BluetoothGattCallback {
         callbackContext.sendPluginResult(result);
     }
 
-    public void disconnect() {
+    public void disconnect(CallbackContext callbackContext) {
         connectCallback = null;
+        disconnectCallback = callbackContext;
 
         if (gatt != null) {
             gatt.disconnect();
         }
 
-        close();
+        if (connected === true) {
+            close();
+        } else  {
+            // In the process of connection or currently disconnected
+
+            if (disconnectCallback) {
+                disconnectCallback.success();
+            }
+            close();
+        }
+
     }
 
     // Closes the connection completely
@@ -220,7 +232,7 @@ public class Peripheral extends BluetoothGattCallback {
         } else {
             LOG.e(TAG, "Service discovery failed. status = " + status);
             connectCallback.error(this.asJSONObject("Service discovery failed"));
-            disconnect();
+            disconnect(null);
         }
     }
 
@@ -240,7 +252,7 @@ public class Peripheral extends BluetoothGattCallback {
             if (connectCallback != null) {
                 connectCallback.error(this.asJSONObject("Peripheral Disconnected"));
             }
-            disconnect();
+            disconnect(null);
         }
 
     }
