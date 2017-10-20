@@ -255,7 +255,7 @@ __NOTE__: the connect failure callback will be called if the peripheral disconne
 
 Disconnect.
 
-    ble.disconnect(device_id, [success], [failure]);
+    ble.disconnect(device_id, [wait_for_disconnection], [success], [failure]);
 
 ### Description
 
@@ -264,8 +264,11 @@ Function `disconnect` disconnects the selected device.
 ### Parameters
 
 - __device_id__: UUID or MAC address of the peripheral
+- __wait_for_disconnection__: Wait for the BLE to be completely disconnected * See note. [optional; default: false]
 - __success__: Success callback function that is invoked when the connection is successful. [optional]
 - __failure__: Error callback function, invoked when error occurs. [optional]
+
+Note: Be careful with __wait_for_disconnection__ as sometimes it is possible that the callback is never called. This is due to some issues with the android implementation. You are thus responsible for managing a timeout
 
 ## read
 
@@ -292,7 +295,7 @@ Raw data is passed from native code to the callback as an [ArrayBuffer](#typed-a
 Retrieves an [ArrayBuffer](#typed-arrays) when reading data.
 
     // read data from a characteristic, do something with output data
-    ble.read(device_id, service_uuid, characteristic_uuid, 
+    ble.read(device_id, service_uuid, characteristic_uuid,
         function(data){
             console.log("Hooray we have data"+JSON.stringify(data));
             alert("Successfully read data from device."+JSON.stringify(data));
@@ -301,7 +304,7 @@ Retrieves an [ArrayBuffer](#typed-arrays) when reading data.
             alert("Failed to read characteristic from device.");
         }
     );
-   
+
 ## write
 
 Writes data to a characteristic.
@@ -749,9 +752,9 @@ Add a new section to config.xml
             </array>
         </config-file>
     </platform>
-    
+
 See [ble-background](https://github.com/don/ble-background) example project for more details.
-    
+
 # Testing the Plugin
 
 Tests require the [Cordova Plugin Test Framework](https://github.com/apache/cordova-plugin-test-framework)
@@ -773,7 +776,7 @@ Change the start page in `config.xml`
 Run the app on your phone
 
     cordova run android --device
-    
+
 # Nordic DFU
 
 If you need Nordic DFU capability, Tomáš Bedřich has a [fork](https://github.com/fxe-gear/cordova-plugin-ble-central) of this plugin that adds an `updateFirmware()` method that allows users to upgrade nRF5x based chips over the air. https://github.com/fxe-gear/cordova-plugin-ble-central
