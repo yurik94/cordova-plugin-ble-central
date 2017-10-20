@@ -68,7 +68,9 @@ public class Peripheral extends BluetoothGattCallback {
         BluetoothDevice device = getDevice();
         connecting = true;
 
+        disconnectCallback = null;
         connectCallback = callbackContext;
+
         if (Build.VERSION.SDK_INT < 23) {
             gatt = device.connectGatt(activity, false, this);
         } else {
@@ -88,9 +90,7 @@ public class Peripheral extends BluetoothGattCallback {
             gatt.disconnect();
         }
 
-        if (connected === true) {
-            close();
-        } else  {
+        if (connected != true) {
             // In the process of connection or currently disconnected
 
             if (disconnectCallback) {
@@ -243,16 +243,31 @@ public class Peripheral extends BluetoothGattCallback {
 
         if (newState == BluetoothGatt.STATE_CONNECTED) {
 
-            connected = true;
-            connecting = false;
-            gatt.discoverServices();
-
-        } else {
+            if (connected == false && connecting == false) {
+                LOG.d(TAG, "We received connected state, while we were NOT attempting to connect. Disconnecting...");
+                disconnect(null);
+            } else {
+                connected = true;
+                connecting = false;
+                gatt.discoverServices();
+            }
+        } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+            if (disconnectCallback != null) {
+                disconnectCallback.success();
+            }
 
             if (connectCallback != null) {
                 connectCallback.error(this.asJSONObject("Peripheral Disconnected"));
             }
+
+            close();
+        } else {
+            if (connectCallback != null) {
+                connectCallback.error(this.asJSONObject("Peripheral Disconnected"));
+            }
+
             disconnect(null);
+            close();
         }
 
     }
