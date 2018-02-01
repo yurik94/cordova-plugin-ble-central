@@ -372,7 +372,8 @@ public class Peripheral extends BluetoothGattCallback {
                     }
 
                 } else {
-                    callbackContext.error("Set notification failed for " + characteristicUUID);
+                    //FIX BLUNO Service notification
+                    //callbackContext.error("Set notification failed for " + characteristicUUID);
                 }
 
             } else {
